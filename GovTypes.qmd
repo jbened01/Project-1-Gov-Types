@@ -13,7 +13,7 @@ democracy_data <- readr::read_csv('https://raw.githubusercontent.com/rfordatasci
 
 # Data cleaning
 
-The data has been cleaned by using the dplyr package. Missing values for some columns were entered as "?", so those values are now NA. The columns were renamed to make more sense. Some columns were changed using mutate with dplyr. Also, the columns that were meant to be logical but were not were changed to logical using as.logical.
+The data has been cleaned by using the `dplyr` package. Missing values for some columns were entered as "?", so those values are now NA. The columns were renamed to make more sense. Some columns were changed using `mutate` with `dplyr`. Also, the columns that were meant to be logical but were not were changed to logical using `as.logical`.
 
 # Research Questions
 
