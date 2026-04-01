@@ -1,0 +1,21 @@
+---
+title: "GovTypes"
+format: html
+---
+
+# Load data
+
+```{r}
+#| message: false
+#| warning: false
+democracy_data <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/main/data/2024/2024-11-05/democracy_data.csv')
+```
+
+# Data cleaning
+
+The data has been cleaned by using the dplyr package. Missing values for some columns were entered as "?", so those values are now NA.
+
+# Research Questions
+
+-   Is there a relationship between a country being communist and having full suffrage?
+-   Is there a relationship between regime category and spatial democracy score?
