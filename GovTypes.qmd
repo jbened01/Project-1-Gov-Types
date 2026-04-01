@@ -18,4 +18,16 @@ The data has been cleaned by using the dplyr package. Missing values for some co
 # Research Questions
 
 -   Is there a relationship between a country being communist and having full suffrage?
--   Is there a relationship between regime category and spatial democracy score?
+-   Is there a relationship between a country being a monarchy and spatial democracy score?
+-   Do communist countries go to war more often than non-communist countries?
+-   Is there an association between regime category index and GDP?
+
+# Plots
+
+-   Is there a relationship between a country being communist and having full suffrage?
+
+![](images/Untitled-2026-01-27-1448.png){width="389"}
+
+-   Is there a relationship between a country being a monarchy and spatial democracy score?
+
+![](images/Untitled-2026-01-27-1449.png){width="389"}
