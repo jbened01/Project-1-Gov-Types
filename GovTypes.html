@@ -99,6 +99,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
+<section id="context-of-the-data" class="level1">
+<h1>Context of the Data</h1>
+<p>This dataset comes from the TidyTuesday project and contains information about political regimes across countries and time. Each row represents a country and year observation. The dataset includes variables such as regime type, different measures of democracy, suffrage, and other political aspects.</p>
+</section>
 <section id="load-data" class="level1">
 <h1>Load data</h1>
 <div class="cell">
@@ -107,7 +111,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="data-cleaning" class="level1">
 <h1>Data cleaning</h1>
-<p>The data has been cleaned by using the dplyr package. Missing values for some columns were entered as “?”, so those values are now NA.</p>
+<p>The data has been cleaned by using the <code>dplyr</code> package. Missing values for some columns were entered as “?”, so those values are now NA. The columns were renamed to make more sense. Some columns were changed using <code>mutate</code> with <code>dplyr</code>. Also, the columns that were meant to be logical but were not were changed to logical using <code>as.logical</code>.</p>
 </section>
 <section id="research-questions" class="level1">
 <h1>Research Questions</h1>

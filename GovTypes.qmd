@@ -3,6 +3,10 @@ title: "GovTypes"
 format: html
 ---
 
+# Context of the Data
+
+This dataset comes from the TidyTuesday project and contains information about political regimes across countries and time. Each row represents a country and year observation. The dataset includes variables such as regime type, different measures of democracy, suffrage, and other political aspects.
+
 # Load data
 
 ```{r}
