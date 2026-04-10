@@ -35,3 +35,36 @@ The data has been cleaned by using the `dplyr` package. Missing values for some 
 -   Is there a relationship between a country being a monarchy and spatial democracy score?
 
 ![](images/Untitled-2026-01-27-1449.png){width="389"}
+# Project Checkpoint 2
+
+```{r}
+library(tidyverse)
+my_function <- function(lgl_var, spatial_democracy = democracy_data$spatial_democracy){
+  valid <- !is.na(lgl_var)
+  true_mean <- mean(spatial_democracy[valid & lgl_var], na.rm = TRUE)
+  false_mean <- mean(spatial_democracy[valid & !lgl_var], na.rm = TRUE)
+  c("TRUE" = true_mean, "FALSE" = false_mean)
+}
+
+vars <- c("is_monarchy", "is_commonwealth", "is_female_monarch", "is_democracy", "is_presidential", "is_interim_phase", "is_female_president", "is_colony", "is_communist", "has_proportional_voting", "has_full_suffrage", "is_multiparty", "has_free_and_fair_election")
+
+map(vars, function(var) {
+  my_function(democracy_data[[var]])
+})
+
+library(purrr)
+library(tibble)
+
+result_df <- map_dfr(vars, function(var) {
+  res <- my_function(democracy_data[[var]])
+  
+  tibble(
+    variable = var,
+    mean_true = res["TRUE"],
+    mean_false = res["FALSE"]
+  )
+})
+
+result_df
+```
+
