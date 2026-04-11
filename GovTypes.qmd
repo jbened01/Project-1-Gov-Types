@@ -35,7 +35,12 @@ The data has been cleaned by using the `dplyr` package. Missing values for some 
 -   Is there a relationship between a country being a monarchy and spatial democracy score?
 
 ![](images/Untitled-2026-01-27-1449.png){width="389"}
+
 # Project Checkpoint 2
+
+# RQ 1
+
+# Spatial democracy across political characteristics
 
 ```{r}
 library(tidyverse)
@@ -81,3 +86,25 @@ result <- map_dfr(vars, function(var) {
 result
 ```
 
+## RQ 2
+
+## Regimes by Year
+
+```{r}
+library(tidyverse)
+
+props <- function(variable){
+democracy_data |>
+  group_by(year) |>
+  summarise(prop = mean(.data[[variable]], na.rm = TRUE))
+}
+
+vars <- c("is_monarchy", "is_commonwealth", "is_presidential",
+          "is_colony", "is_communist")
+
+result <- map_dfr(vars, function(var) {
+  props(var) |>
+    mutate(variable = var)
+})
+result
+```
