@@ -1,7 +1,9 @@
 ---
-title: "GovTypes"
+title: "Project-1-Checkpoint2"
 format: html
 ---
+
+# Project Checkpoint 2
 
 # Context of the Data
 
@@ -18,25 +20,6 @@ democracy_data <- readr::read_csv('https://raw.githubusercontent.com/rfordatasci
 # Data cleaning
 
 The data has been cleaned by using the `dplyr` package. Missing values for some columns were entered as "?", so those values are now NA. The columns were renamed to make more sense. Some columns were changed using `mutate` with `dplyr`. Also, the columns that were meant to be logical but were not were changed to logical using `as.logical`.
-
-# Research Questions
-
--   Is there a relationship between a country being communist and having full suffrage?
--   Is there a relationship between a country being a monarchy and spatial democracy score?
--   Do communist countries go to war more often than non-communist countries?
--   Is there an association between regime category index and GDP?
-
-# Plots
-
--   Is there a relationship between a country being communist and having full suffrage?
-
-![](images/Untitled-2026-01-27-1448.png){width="389"}
-
--   Is there a relationship between a country being a monarchy and spatial democracy score?
-
-![](images/Untitled-2026-01-27-1449.png){width="389"}
-
-# Project Checkpoint 2
 
 ## RQ 1
 
@@ -86,6 +69,8 @@ result <- map_dfr(vars, function(var) {
 result
 ```
 
+As expected, among the 13 columns we examined, the highest spatial democracy scores came from democratic countries with proportional voting. The spatial democracy score for female monarchs or presidents was higher than plain presidential countries or monarchies, which is important to note.
+
 ## RQ 2
 
 ## Regimes by Year
@@ -108,6 +93,8 @@ result <- map_dfr(vars, function(var) {
 })
 result
 ```
+
+Our findings tell us that throughout the 20th century and into the 21st century, the proportion of monarchies has decreased, while commonwealth and presidential countries became more prevalent, to name a few regimes. One interesting thing to point is that the proportion of communist countries saw a sudden decline in the late 1900s, so we think it would be intriguing to look further into why that was the case.
 
 ## RQ 3
 
@@ -147,6 +134,8 @@ tenure_by_regime(tenure_data, "president")
 tenure_by_regime(tenure_data, "monarch")
 ```
 
+For presidential regimes, the dictatorships tend to have longer regimes, which aligns with our expectations. Royal dictatorship returned a mean tenure of 0 years, so we should look into why that was the case, and whether that was an error in the data or some other reason. Also, having spatial democracy score by regime would be interesting to look at and might reveal the effectiveness of certain regime types.
+
 ## RQ 4
 
 ## How young does monarchs rise to power compared to presidents?
@@ -168,3 +157,5 @@ get_mean <- function(x){
 cols <- c("monarch_age", "president_age")
 map(cols, get_mean)
 ```
+
+Our findings from this question reveal that monarch tend to be much younger during their reign as compared to presidents. It is easy to see why that is the case, as monarchs are often thrown into power under extraneous circumstances such as the death of the former monarch. As for presidents, many countries already have an age limit for presidential candidates which increases the average age of presidents. Another reason for presidents tending to be older is the fact that older candidates might be more appealing due to their experience in politics, or their specific policies that pertain to certain age groups.
