@@ -179,6 +179,8 @@ life_expectancy$countryCode <-  countrycode(life_expectancy$Country,
             destination = "iso3c", 
             custom_match = c("Netherlands Antilles" = "ANT",
                              "Virgin Islands" = "VIR"))
+
+write.csv(life_expectancy, "Data/country_life_expectancy.csv", row.names = FALSE)
 ```
 
 ## Add a country codes variable in the original dataset
