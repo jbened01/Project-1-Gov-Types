@@ -11,8 +11,10 @@ format: html
 library(ggplot2)
 library(tidyverse)
 
+# read in data
 meta_data <- read.csv("meta_data.csv")
 
+# create hexagram plot
 meta_data |>
   mutate(Status = factor(Status, levels = c("Developing", "Developed"))) |>
   filter(!is.na(Status)) |>
@@ -20,7 +22,7 @@ meta_data |>
   geom_hex() +
   facet_wrap(~ Status) +
   scale_fill_viridis_c(option = "C") +
-  labs(title = "Schooling vs Life Expectancy by Development Status",
+  labs(title = "Schooling vs Life Expectancy by Development Status (2000-2015)",
        x = "Schooling",
        y = "Life Expectancy",
        fill = "Count") +
