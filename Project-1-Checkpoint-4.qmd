@@ -1,0 +1,31 @@
+---
+title: "Project-1-Checkpoint-4"
+format: html
+---
+
+
+```{r}
+#| warning: false
+#| fig-alt: "faceted hexagram plots showing the relationship between schooling and life expectancy for many countries, grouped by whether the country is developing or already developed."
+
+library(ggplot2)
+library(tidyverse)
+
+meta_data <- read.csv("meta_data.csv")
+
+meta_data |>
+  mutate(Status = factor(Status, levels = c("Developing", "Developed"))) |>
+  filter(!is.na(Status)) |>
+  ggplot(aes(x = Schooling, y = Life.expectancy)) +
+  geom_hex() +
+  facet_wrap(~ Status) +
+  scale_fill_viridis_c(option = "C") +
+  labs(title = "Schooling vs Life Expectancy by Development Status",
+       x = "Schooling",
+       y = "Life Expectancy",
+       fill = "Count") +
+  theme_bw()
+  
+  
+```
+
