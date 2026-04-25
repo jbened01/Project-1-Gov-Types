@@ -4,9 +4,13 @@ format: html
 ---
 
 
+## Visualization #1
+
+### Hexbin Plots of Schooling vs Life Expectancy by Development Status
+
 ```{r}
 #| warning: false
-#| fig-alt: "faceted hexagram plots showing the relationship between schooling and life expectancy for many countries, grouped by whether the country is developing or already developed."
+#| fig-alt: "faceted hexbin plots showing the relationship between schooling and life expectancy for many countries, grouped by whether the country is developing or already developed."
 
 library(ggplot2)
 library(tidyverse)
@@ -31,6 +35,10 @@ meta_data |>
   
 ```
 
+
+## Visualization #2
+
+### Area Plot of Mean GDP Per Capita by Regime Type From 2000-2020
 
 ```{r}
 # changing df name to fit partner's code
