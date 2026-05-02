@@ -154,6 +154,7 @@ comparison_table
 
 ```{r}
 #| message: false
+#| fig-alt: "density ridge plot showing the distribution spread of tenure length in years by different presidential regimes."
 
 tenure_data |>
   filter(!is.na(president_tenure), 
@@ -178,6 +179,8 @@ tenure_data |>
 # Visualization #2
 
 ```{r}
+#| fig-alt: "jittered scatterplot that plots each monarchy regime by type of regime and how long the regime's tenure was in years."
+
 tenure_data |>
   filter(!is.na(monarch_tenure), !is.na(regime_category), is_monarchy == TRUE) |>
   mutate(regime_category = stringr::str_wrap(regime_category, width = 25)) |>
