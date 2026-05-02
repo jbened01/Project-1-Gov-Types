@@ -1,6 +1,13 @@
 ---
 title: "Project 1 Final Deliverable"
-format: html
+format: 
+  html:
+    theme: 
+      light: flatly
+      dark: darkly
+embed-resources: true
+code-fold: true
+
 ---
 
 # Data Context
