@@ -110,6 +110,8 @@ president_table <- president_summary |>
 president_table
 ```
 
+Findings: Presidential regimes tend to last shorter than other regimes, likely because there are limits to how long a president can be in power. Also consistent with what we would expect, dictatorships tend to last much longer than non-dictatorships, with the top two longest regimes being a form of dictatorship.
+
 # Summary Table #2
 
 ```{r}
@@ -148,7 +150,7 @@ comparison_table <- combined_wide |>
 comparison_table
 ```
 
-
+Findings: When looking at the tenures between presidents and monarchs, we can see that monarchs tend to be in power for much longer than presidents. This does not come as a surprise because monarchs are meant to rule for a longer period of time, especially since the power is often inherited by an heir. Even so, military dictatorships seem to be the longest lasting regimes regardless of the ruler being a president versus a monarch.
 
 # Visualization #1
 
@@ -176,6 +178,8 @@ tenure_data |>
   theme_bw()
 ```
 
+Findings: In this plot we can see how the distribution of tenure differs among various regime types. The two "outliers" here are military and civilian dictatorships. From the previous tables we saw that these two regimes are the longest lasting, but this plot also shows the spread of the duration of the regime.
+
 # Visualization #2
 
 ```{r}
@@ -197,6 +201,7 @@ tenure_data |>
   theme_bw()
 ```
 
+Findings: This plot is similar to the previous plot in that it also shows the distribution of duration of regime for various regime types, but This plot also shows the frequency. For example, most of the civilian dictatorships last between 0-20 years, but we can also see that a few regimes have lasted for around 60 years. A common trend in this plot is that most of the longer lasting regimes seem to be colonies or oversea territories. It'd be interesting to look into whether colonies tend to last longer than other types of countries.
 
 # Data Model
 
