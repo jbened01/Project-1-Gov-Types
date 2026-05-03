@@ -1,0 +1,197 @@
+---
+title: "Project 2 Dashboard"
+format: 
+  dashboard: 
+    theme: flatly
+    highlight-style: github
+    mainfont: "Inter"
+    orientation: columns
+embed-resources: true
+nav-buttons: [github]
+github: https://github.com
+logo: globe-1.png
+logo-alt: "Blue globe logo"
+---
+
+# Research Question #1
+
+```{r}
+#Chunk used to load needed packages and data sets
+#| message: false
+#| warning: false
+
+suppressPackageStartupMessages({
+  library(tidyverse)
+  library(countrycode)
+  library(glue)
+  library(jsonlite)
+  library(palmerpenguins)
+  library(gt)
+  library(tidyr)
+  library(purrr)
+  library(ggridges)
+  library(stringr)
+  library(dplyr)
+  library(ggplot2)
+})
+
+meta_data <- suppressMessages(read_csv("meta_data.csv", show_col_types = FALSE))
+```
+
+## Plots
+
+### Tenure by Presidential Regime
+::: {.card title = "Tenure by Presidential Regime"}
+
+```{r}
+#| message: false
+#| fig-alt: "density ridge plot showing the distribution spread of tenure length in years by different presidential regimes."
+
+tenure_data <- meta_data |>
+  mutate(president_tenure = year - president_accesion_year,
+    monarch_tenure = year - monarch_accession_year
+  )
+
+tenure_data |>
+  filter(!is.na(president_tenure), 
+         !is.na(regime_category),
+         is_presidential == TRUE) |>
+  mutate(regime_category = stringr::str_wrap(regime_category, width = 25)) |>
+  ggplot(aes(x = president_tenure,
+             y = reorder(regime_category, president_tenure, FUN = median),
+             fill = after_stat(x))) +
+  geom_density_ridges_gradient(scale = 1.2,
+                               rel_min_height = 0.01,
+                               color = "white",
+                               alpha = 0.9) +
+  scale_fill_viridis_c(option = "C") +
+  labs(x = "Tenure (years)",
+       y = "Regime",
+       fill = "Years") +
+  theme_bw()
+```
+:::
+
+### Tenure by Monarchy
+::: {.card title = "Tenure by Monarchy"}
+
+```{r}
+#| fig-alt: "jittered scatterplot that plots each monarchy regime by type of regime and how long the regime's tenure was in years."
+
+tenure_data |>
+  filter(!is.na(monarch_tenure), !is.na(regime_category), is_monarchy == TRUE) |>
+  mutate(regime_category = stringr::str_wrap(regime_category, width = 25)) |>
+  ggplot(aes(x = reorder(regime_category, monarch_tenure),
+             y = monarch_tenure,
+             color = monarch_tenure)) +
+  geom_jitter(width = 0.15, alpha = 0.7, size = 2) +
+  coord_flip() +
+  scale_color_viridis_c(option = "C") +
+  labs(x = "Regime",
+       y = "Tenure (years)",
+       color = "Years") +
+  theme_bw()
+```
+:::
+
+
+## Tables
+::: panel-tabset
+
+### Tenure by Presidential Regime
+
+```{r}
+#| message: false
+#| warning: false
+
+tenure_data <- meta_data |>
+  mutate(president_tenure = year - president_accesion_year,
+    monarch_tenure = year - monarch_accession_year
+  )
+
+# function to get the mean tenure of either presidents or monarchs, and group them by their regime       category
+tenure_by_regime <- function(data, leader_type) {
+  if (leader_type == "president") {
+    data |>
+      filter(!is.na(president_name), !is.na(president_tenure)) |> 
+      group_by(president_name, regime_category) |> 
+      summarize(tenure = max(president_tenure, na.rm = TRUE), .groups = "drop") |>
+      group_by(regime_category) |>
+      summarize(mean_tenure = mean(tenure, na.rm = TRUE))
+  } else {
+    data |>
+      filter(!is.na(monarch_name), !is.na(monarch_tenure)) |>
+      group_by(monarch_name, regime_category) |>
+      summarize(tenure = max(monarch_tenure, na.rm = TRUE), .groups = "drop") |> 
+      group_by(regime_category) |>
+      summarize(mean_tenure = mean(tenure, na.rm = TRUE))
+  }
+}
+
+
+president_summary <- tenure_by_regime(tenure_data, "president")
+monarch_summary <- tenure_by_regime(tenure_data, "monarch")
+
+president_table <- president_summary |>
+  arrange(desc(mean_tenure)) |>
+  gt() |>
+  tab_header(title = "Mean Tenure by Presidential Regimes") |>
+  cols_label(regime_category = "Regime Category",
+             mean_tenure = "Mean Tenure (years)") |>
+  fmt_number(columns = c(mean_tenure),
+             decimals = 1) |>
+  tab_style(style = cell_text(weight = "bold"),
+            locations = cells_column_labels(columns = everything())) |>
+  tab_caption("Presidential regimes sorted in descending order by mean tenure length.") |>
+  data_color(
+    columns = mean_tenure,
+    colors = scales::col_numeric(c("#deebf7", "#08519c"), domain = NULL)
+  )
+  
+
+president_table
+```
+
+
+### Comparison of Tenure by Presidencies and Monarchies
+
+```{r}
+get_tenure <- function(x) {
+  tenure_by_regime(tenure_data, x) |>
+    mutate(leader_type = x)
+}
+
+combined_wide <- map_dfr(c("president", "monarch"), get_tenure)|>
+  mutate(leader_type = recode(leader_type,
+                              president = "President",
+                              monarch = "Monarch")) |>
+  pivot_wider(names_from = leader_type,
+              values_from = mean_tenure) |>
+   drop_na(President, Monarch)
+
+
+comparison_table <- combined_wide |>
+  arrange(desc(President)) |>
+  gt() |>
+  tab_header(title = "Comparison of Mean Leader Tenure Across Regimes") |>
+  cols_label(regime_category = "Regime Category",
+             President = "President",
+             Monarch = "Monarch") |>
+  tab_spanner(label = "Mean Tenure (years)",
+              columns = c(President, Monarch)) |>
+  fmt_number(columns = c(President, Monarch),
+             decimals = 1) |>
+  tab_style(style = cell_text(weight = "bold"),
+            locations = cells_column_labels(columns = everything())) |>
+  tab_caption("Comparison of mean presidential and monarchical tenure across regime categories.") |>
+  data_color(columns = c(President, Monarch),
+  colors = scales::col_numeric(c("#deebf7", "#08519c"), domain = NULL))
+
+comparison_table
+```
+
+
+:::
+
+
+# Research Question #2
