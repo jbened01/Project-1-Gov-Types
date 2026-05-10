@@ -10,9 +10,9 @@ code-fold: true
 
 ---
 
-# Data Context
+# How Do Political Regimes Shape Leader Tenure and Economic Output?
 
-We used data from three different sources to help us answer two specific questions regarding geopolitics, health, and economics.
+Different countries run under very different political systems; some are democracies, some are dictatorships, and some fall somewhere in between. This report looks at two questions: **How does leader tenure differ across political regimes?** and **How does economic output differ across regime types?**
 
 ## Data Set #1 - "Democracy and Dictatorship"
 
@@ -26,14 +26,6 @@ This secondary dataset was obtained to supplement the original with data on coun
 
 The third dataset we used is published and maintained by the API Ninjas team, who collects economic data from multiple sources. The data set consists of country-level observations, with each record representing a country’s GDP and related indicators for specific years. It includes both historical and more recent data, depending on the query made through the API. The data is collected and distributed digitally via API, though the exact original data sources are not fully specified. These data are of interest because they provide accessible and up to date economic indicators for use in analysis, applications, and research, making it easier to study and compare economic performance across countries.
 
-# Research Questions
-
-As mentioned earlier, using the data we obtained, we came up with two relevant research questions:
-
-1. How does leader tenure differ across different political regimes?
-
-2. How does economic output differ across political regime types?
-
 # Data Summaries and Visualizations
 
 ```{r}
@@ -41,6 +33,7 @@ As mentioned earlier, using the data we obtained, we came up with two relevant r
 #| message: false
 #| warning: false
 
+#install.packages("ggridges")
 suppressPackageStartupMessages({
   library(tidyverse)
   library(countrycode)
@@ -60,10 +53,11 @@ suppressPackageStartupMessages({
 meta_data <- suppressMessages(read_csv("meta_data.csv", show_col_types = FALSE))
 ```
 
-### How does leader tenure differ across different political regimes?
+## Leader Tenure Across Regimes
+
+To see how long leaders stay in power under different regimes, we calculated the mean tenure of presidents and monarchs grouped by regime category.
 
 ```{r}
-#| label: tbl-president-tenure
 tenure_data <- meta_data |>
   mutate(president_tenure = year - president_accesion_year,
     monarch_tenure = year - monarch_accession_year
@@ -89,7 +83,9 @@ tenure_by_regime <- function(data, leader_type) {
 }
 ```
 
+### How does leader tenure differ across different political regimes?
 ```{r}
+#| label: tbl-president-tenure
 #| message: false
 #| warning: false
 
@@ -115,7 +111,6 @@ president_table <- president_summary |>
 
 president_table
 ```
-
 Our table shows that Presidential regimes tend to last shorter than other regimes, likely because there are limits to how long a president can be in power. Also consistent with what we would expect, dictatorships tend to last much longer than non-dictatorships, with the top two longest regimes being a form of dictatorship.
 
 ### How does leader tenure differ across presidencies vs. monarchies for various political regimes?
@@ -156,7 +151,6 @@ comparison_table <- combined_wide |>
 
 comparison_table
 ```
-
 When looking at the tenures between presidents and monarchs, we can see that monarchs tend to be in power for much longer than presidents. This does not come as a surprise because monarchs are meant to rule for a longer period of time, especially since the power is often inherited by an heir. Even so, military dictatorships seem to be the longest lasting regimes regardless of the ruler being a president versus a monarch.
 
 ### Tenure length by different presidential regimes
@@ -185,7 +179,6 @@ tenure_data |>
        fill = "Years") +
   theme_bw()
 ```
-
 In this plot we can see how the distribution of tenure differs among various regime types. The two "outliers" here are military and civilian dictatorships. From the previous tables we saw that these two regimes are the longest lasting, but this plot also shows the spread of the duration of the regime.
 
 ### Tenure length by different monarchical regimes
@@ -211,9 +204,9 @@ tenure_data |>
   theme_bw()
 ```
 
-This plot is similar to the previous plot in that it also shows the distribution of duration of regime for various regime types, but This plot also shows the frequency. For example, most of the civilian dictatorships last between 0-20 years, but we can also see that a few regimes have lasted for around 60 years. A common trend in this plot is that most of the longer lasting regimes seem to be colonies or oversea territories. It'd be interesting to look into whether colonies tend to last longer than other types of countries.
+## GDP Across Regime Types
 
-How does economic output differ across political regime types?
+We grouped countries into seven regime categories and compared their mean GDP per capita from 2000 to 2020. Since several territory and colonycategories had fewer than 100 observations each, we combined them into one "Territories & Colonies" group.
 
 ```{r}
 #| message: false
@@ -226,8 +219,6 @@ combined <- meta_data |>
                                  first(regime_category))) |>
   ungroup()
 ```
-
-### Summary Table #3
 
 ```{r}
 #| label: tbl-gdp-regime
@@ -257,7 +248,9 @@ combined |>
   tab_caption("GDP per capita sorted in descending mean GDP by regime type")
 ```
 
-### Visualization #3
+@tbl-gdp-regime shows that Territories & Colonies have the highest mean GDP 
+per capita, followed by Royal dictatorships and Parliamentary democracies. 
+Military and Civilian dictatorships sit at the bottom.
 
 ```{r}
 #| label: fig-gdp-area
@@ -284,8 +277,14 @@ ggplot(data = mean_gdp,
   theme(legend.position = "none")
 ```
 
-@tbl-gdp-regime shows that Territories & Colonies have the highest mean GDP per capita, followed by Royal dictatorships and Parliamentary democracies. Military and Civilian dictatorships fall at the bottom. @fig-gdp-area shows these trends over time as most regime types saw steady GDP growth from 2000 to 2020, with dips around 2015 and 2020, with Territories & Colonies claiming the biggest growth.
+@fig-gdp-area breaks this down over time. Most regime types saw steady GDP 
+growth from 2000 to 2020, with dips around 2015 and 2020. Territories & 
+Colonies had the biggest growth overall.
 
+
+## Democracies vs Non-Democracies
+
+Simplifying the comparison down to just democracies versus non-democracies helps us look into the patterns from another perspective.
 
 ```{r}
 dem_gdp <- combined |>
@@ -295,7 +294,6 @@ dem_gdp <- combined |>
             .groups = "drop")
 ```
 
-### Summary Table #4
 
 ```{r}
 #| label: tbl-gdp-democracy
@@ -309,7 +307,7 @@ dem_gdp |>
   tab_caption("Mean GDP per capita compared by democracy status, 2000–2020.")
 ```
 
-### Visualization #4
+
 ```{r}
 #| label: fig-gdp-line
 #| fig-alt: "Line plot comparing mean GDP per capita between democracies and non-democracies from 2000 to 2020."
@@ -327,12 +325,14 @@ ggplot(dem_gdp, aes(x = year, y = mean_gdp, color = democracy)) +
   theme(panel.grid.minor = element_blank())
 ```
 
-@tbl-gdp-democracy and @fig-gdp-line compare democracies and non-democracies directly. Democracies consistently have a higher mean GDP per capita across the entire period, and the gap between the two groups widens over time.
+@tbl-gdp-democracy and @fig-gdp-line show that democracies consistently have a higher mean GDP per capita, and the gap between the two groups widens over time.
 
 
 Overall, economic output varies substantially across regime types, with democracies and territories outperforming dictatorships in mean GDP per capita.
 
-# Data Model
+## Statistical Model
+
+To test whether the differences in leader tenure across regimes are statistically significant, we ran a two-way ANOVA with regime category and year as predictors.
 
 ```{r}
 stuff <- meta_data %>%
@@ -381,4 +381,4 @@ model %>%
   )
 ```
 
-The ANOVA results show that leader tenure differs significantly across political regimes, as the effect of regime category is highly statistically significant (F = 297.80, p \< 0.001). This indicates that the type of political regime plays a major role in determining how long leaders remain in power. However, the effect of year is not statistically significant (F = 0.17, p ≈ 1.00), suggesting there is no meaningful change in leader tenure over time once regime type is considered. Overall, these findings suggest that variation in leader tenure is mainly due to differences between political regimes rather than trends over time.
+The ANOVA results show that leader tenure differs significantly across political regimes (F = 297.80, p < 0.001), meaning the type of regime plays a major role in how long leaders stay in power. The effect of year is not significant (F = 0.17, p ≈ 1.00), meaning there's no meaningful change in tenure over time once regime type is accounted for. The variation in leader tenure is mainly driven by differences between regimes, not by trends over time.
