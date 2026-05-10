@@ -1,5 +1,4 @@
 ---
-title: "Project 1 Final Deliverable"
 format: 
   html:
     theme: 
@@ -14,19 +13,9 @@ code-fold: true
 
 Different countries run under very different political systems; some are democracies, some are dictatorships, and some fall somewhere in between. This report looks at two questions: **How does leader tenure differ across political regimes?** and **How does economic output differ across regime types?**
 
-## Data Set #1 - "Democracy and Dictatorship"
+## About the Data
 
-The main dataset we started with was originally created by J. A. Cheibub, J. Gandhi, and J. R. Vreeland in "Democracy and Dictatorship Revisited" which was later edited for the TidyTuesday project by Jon Harmon. It contains observations of different countries around the world, meaning the observational unit is a country observed over time. The data span from 1950 to 2020, making it a long data set that tracks changes in political systems across several decades. The data was collected to study regime types, including democracies and non-democracies, as well as transitions such as coups and other forms of regime changes. These topics are important for understanding global political stability, governance, and institutional development. The dataset comes from the TidyTuesday project. This data was collected by Jon Harmon. The data was collected to be prepared and ready on 11/04/24 as part of the tidytuesday project. The dataset is portrayed in J. A. Cheibub, J. Gandhi, and J. R. Vreeland. "Democracy and Dictatorship Revisited". In: Public Choice 143.1-2 (2009), pp. 67-101. 
-
-## Data Set #2 - "Countries Life Expectancy"
-
-This secondary dataset was obtained to supplement the original with data on country health statistics which includes country-level health, economic, and demographic numbers that are associated with life expectancy. Some examples are immunization rates, mortality rates, and economic variables such as GDP and health expenditure. The data accounts for 178 countries from 2000 to 2015. This data set was obtained from Kaggle (by Amir Hossein Mirzaei).
-
-## Data Set #3 - "API Ninjas GDP API"
-
-The third dataset we used is published and maintained by the API Ninjas team, who collects economic data from multiple sources. The data set consists of country-level observations, with each record representing a country’s GDP and related indicators for specific years. It includes both historical and more recent data, depending on the query made through the API. The data is collected and distributed digitally via API, though the exact original data sources are not fully specified. These data are of interest because they provide accessible and up to date economic indicators for use in analysis, applications, and research, making it easier to study and compare economic performance across countries.
-
-# Data Summaries and Visualizations
+The main dataset comes from Cheibub, Gandhi, and Vreeland's "Democracy and Dictatorship Revisited" (2009), later prepared for the TidyTuesday project by Jon Harmon. It tracks regime classifications for countries worldwide from 1950 to 2020, where each observation is a country in a given year. We also use a country-level health and economic dataset from Kaggle (by Amir Hossein Mirzaei), covering 178 countries from 2000 to 2015. GDP data was accessed through the API Ninjas GDP API, which pulls country-level economic indicators from international sources.
 
 ```{r}
 #Chunk used to load needed packages and data sets
@@ -84,6 +73,7 @@ tenure_by_regime <- function(data, leader_type) {
 ```
 
 ### How does leader tenure differ across different political regimes?
+
 ```{r}
 #| label: tbl-president-tenure
 #| message: false
@@ -151,6 +141,7 @@ comparison_table <- combined_wide |>
 
 comparison_table
 ```
+
 When looking at the tenures between presidents and monarchs, we can see that monarchs tend to be in power for much longer than presidents. This does not come as a surprise because monarchs are meant to rule for a longer period of time, especially since the power is often inherited by an heir. Even so, military dictatorships seem to be the longest lasting regimes regardless of the ruler being a president versus a monarch.
 
 ### Tenure length by different presidential regimes
@@ -326,7 +317,6 @@ ggplot(dem_gdp, aes(x = year, y = mean_gdp, color = democracy)) +
 ```
 
 @tbl-gdp-democracy and @fig-gdp-line show that democracies consistently have a higher mean GDP per capita, and the gap between the two groups widens over time.
-
 
 Overall, economic output varies substantially across regime types, with democracies and territories outperforming dictatorships in mean GDP per capita.
 
