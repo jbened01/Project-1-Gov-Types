@@ -6,17 +6,18 @@ format:
     highlight-style: github
     mainfont: "Inter"
     orientation: columns
+embed-resources: true
+server: shiny
 nav-buttons: [github]
 github: https://github.com/duck217/project-1
 logo: globe-1.png
 logo-alt: "Blue globe logo"
-server: shiny
 ---
 
 # GDP Data Across Regimes
 
 ```{r}
-#Chunk used to load needed packages and data sets
+#| context: setup 
 #| message: false
 #| warning: false
 
@@ -24,10 +25,10 @@ suppressPackageStartupMessages({
   library(tidyverse)
   library(countrycode)
   library(glue)
+  library(shiny)
   library(jsonlite)
   library(palmerpenguins)
   library(gt)
-  library(readr)
   library(tidyr)
   library(purrr)
   library(ggridges)
@@ -39,14 +40,14 @@ suppressPackageStartupMessages({
   library(plotly)
   library(tigris)
   library(leaflet)
-  library(shiny)
-  library(bslib)
 })
 
 meta_data <- suppressMessages(read_csv("meta_data.csv", show_col_types = FALSE))
 ```
 
+
 ```{r}
+#| context: setup
 #| message: false
 #| warning: false
 
@@ -69,6 +70,16 @@ dem_gdp <- combined |>
             .groups = "drop")
 
 ```
+## {.sidebar}
+
+```{r}
+selectInput(
+  inputId  = "regime_select",
+  label    = "Select Regime Type:",
+  choices  = c("All", sort(unique(mean_gdp$regime_group))),
+  selected = "All"
+)
+```
 
 ## Plots 
 
@@ -76,24 +87,51 @@ dem_gdp <- combined |>
 ::: {.card title = "Mean GDP per Capita by Regime Type"}
 
 ```{r}
-#| label: fig-gdp-area
-#| fig-alt: "Faceted area plot showing mean GDP per capita from 2000 to 2020 for seven regime types."
+plotOutput('gdp_plot')
+```
 
-ggplot(data = mean_gdp,
-       mapping = aes(x = year,
-                     y = mean_gdp)) +
-  geom_area(mapping = aes(fill = regime_group),
-            alpha = 0.7,
-            identity = "stack") +
-  scale_y_continuous(labels = comma) +
-  scale_fill_brewer(palette = "Set1") +
-  labs(x = "", y = "Mean GDP per Capita (USD)",
-       title = "Mean GDP per Capita by Regime Type",
-       subtitle = "Averaged across countries, 2000–2020",
-       fill = "Regime Type") +
-  theme_minimal() +
-  theme(legend.position = "none",
-        panel.grid.minor = element_blank())
+
+```{r}
+#| context: server
+
+output$gdp_plot <- renderPlot({
+
+  plot_data <- if (input$regime_select == "All") {
+    mean_gdp
+  } else {
+    mean_gdp |> filter(regime_group == input$regime_select)
+  }
+  
+  p <- ggplot(data = plot_data,
+         mapping = aes(x = year, y = mean_gdp)) +
+    geom_area(
+      mapping = aes(fill = regime_group),
+      alpha = 0.7) +
+    scale_y_continuous(labels = comma,
+                       limits = c(0, max(mean_gdp$mean_gdp, na.rm = TRUE))) +
+    scale_fill_manual(values = c(
+      "Civilian dictatorship" = "#2166ac",
+      "Military dictatorship" = "#d6604d",
+      "Mixed democratic"    = "#4d4d4d",
+      "Parliamentary democracy" = "#74add1",
+      "Presidential democracy"  = "#1a9850",
+      "Territories & Colonies" = "#f4a582",
+      "Royal dictatorship"  = "#9970ab")
+    ) +
+    labs(x = "", y = "Mean GDP per Capita (USD)",
+         title = "Mean GDP per Capita by Regime Type",
+         subtitle = "Averaged across countries, 2000–2020",
+         fill = "Regime Type") +
+    theme_minimal() +
+    theme(legend.position = "none",
+          panel.grid.minor = element_blank())
+  
+  if (input$regime_select == "All") {
+    p <- p + facet_wrap(~regime_group, scales = "fixed")
+  }
+  p
+})
+  
 ```
 :::
 
@@ -181,175 +219,124 @@ dem_gdp |>
 #| context: setup
 #| message: false
 #| warning: false
-
-library(shiny)
 library(readr)
-library(dplyr)
-library(stringr)
-library(tigris)
-library(leaflet)
-library(scales)
-library(sf)
-library(gt)
 
-SAINC1_ALL_AREAS_1929_2025 <- read_csv(
-  "SAINC1__ALL_AREAS_1929_2025.csv",
-  show_col_types = FALSE
-)
+SAINC1_ALL_AREAS_1929_2025 <- read_csv("SAINC1__ALL_AREAS_1929_2025.csv")
 
-us_data <- SAINC1_ALL_AREAS_1929_2025 |>
+us_data <- SAINC1_ALL_AREAS_1929_2025
+
+us_data <- us_data |>
   filter(Description == "Per capita personal income (dollars) 2/") |>
-  select(GeoName, "2025") |>
-  rename(income_2025 = `2025`) |>
-  mutate(
-    GeoName = str_remove(GeoName, " \\*$"),
-    income_2025 = parse_number(as.character(income_2025))
-  ) |>
-  filter(GeoName %in% state.name)
+  select(GeoFIPS, GeoName, Region, "2025") |>
+  rename(income_2025 = `2025`)
 
-states_sf <- states(
-  cb = TRUE,
-  class = "sf",
-  progress_bar = FALSE
-)
-
-map_data <- states_sf |>
-  filter(NAME %in% state.name) |>
-  left_join(us_data, by = c("NAME" = "GeoName"))
-
-colors <- colorNumeric(
-  palette = c("#f7fbff", "#6baed6", "#08306b"),
-  domain = map_data$income_2025,
-  na.color = "transparent"
-)
+write.csv(us_data, file = "us_data.csv")
 ```
 
-## {.sidebar}
-
-```{r}
-sliderInput(
-  inputId = "income_min",
-  label = "Minimum Income Per Capita",
-  min = 0,
-  max = ceiling(max(map_data$income_2025, na.rm = TRUE)),
-  value = 0,
-  step = 500,
-  sep = ",",
-  pre = "$"
-)
-```
-
-## Column {width=35%}
+## Tables
 
 ### Why the United States?
 
-::: {.card}
+As a **presidential democracy** country, the United States consistently ranks among the highest GDP per capita countries in our dataset, serving as an outlier. So, by examining how annual income is distributed across states reveals whether this economic output is **evenly spread** or **concentrated** in specific regions.
 
-As a **presidential democracy**, the United States ranks among the highest GDP per capita countries in the dataset. Looking at state-level income shows whether economic output is **evenly spread** or **concentrated** in specific regions.
-
-:::
-
-### Filtered Income Table
-
-::: {.card}
+### Summary Table
 
 ```{r}
+#| label: tbl-income-state
+
 gt_output("income_table")
 ```
-
-:::
-
-## Column {width=65%}
-
-### Income per Capita Map
-
-::: {.card}
-
-```{r}
-leafletOutput("us_map", height = 780)
-```
-
-:::
 
 ```{r}
 #| context: server
 
-filtered_states <- reactive({
-  threshold <- input$income_min
-  if (is.null(threshold)) threshold <- 0
-
-  map_data |>
-    filter(
-      !is.na(income_2025),
-      income_2025 >= threshold
-    )
-})
-
-output$us_map <- renderLeaflet({
-  leaflet(filtered_states(), options = leafletOptions(
-    zoomControl = TRUE,
-    attributionControl = FALSE
-  )) |>
-    addProviderTiles(providers$CartoDB.PositronNoLabels) |>
-    setView(lng = -98.5, lat = 39.8, zoom = 4) |>
-    addPolygons(
-      fillColor = ~colors(income_2025),
-      fillOpacity = 0.9,
-      color = "white",
-      weight = 1.4,
-      label = ~paste0(NAME, ": $", comma(income_2025)),
-      highlightOptions = highlightOptions(
-        weight = 3,
-        color = "black",
-        bringToFront = TRUE
-      )
-    ) |>
-    addLegend(
-      position = "bottomright",
-      pal = colors,
-      values = na.omit(map_data$income_2025),
-      title = "Income per capita",
-      labFormat = labelFormat(prefix = "$", big.mark = ","),
-      opacity = 1
-    )
-})
-
 output$income_table <- render_gt({
-  threshold <- input$income_min
-  if (is.null(threshold)) threshold <- 0
-
-  filtered_states() |>
-    st_drop_geometry() |>
-    transmute(
-      State = NAME,
-      income_2025 = income_2025
+  filtered <- us_data |>
+    mutate(
+      GeoName = str_remove(GeoName, " \\*$"),
+      income_2025 = as.numeric(income_2025)
     ) |>
+    filter(
+      GeoName != "United States",
+      !GeoName %in% c("New England", "Mideast", "Great Lakes", "Plains",
+                       "Southeast", "Southwest", "Rocky Mountain", "Far West")
+    )
+
+  if (input$region_select != "All") {
+    filtered <- filtered |>
+      filter(Region == as.numeric(input$region_select))
+  }
+
+  filtered |>
+    select(GeoName, income_2025) |>
     arrange(desc(income_2025)) |>
     gt() |>
     tab_header(title = "Income per Capita by State") |>
-    cols_label(
-      State = "State",
-      income_2025 = "Income per Capita"
-    ) |>
-    fmt_currency(
-      columns = income_2025,
-      currency = "USD",
-      decimals = 0
-    ) |>
-    data_color(
-      columns = income_2025,
-      palette = c("#f7fbff", "#6baed6", "#08306b")
-    ) |>
-    tab_style(
-      style = cell_text(weight = "bold"),
-      locations = cells_column_labels()
-    ) |>
-    tab_caption(
-      paste0(
-        "Showing states with income per capita of at least ",
-        dollar(threshold, accuracy = 1),
-        "."
-      )
-    )
+    cols_label(GeoName = "State", income_2025 = "Income per Capita") |>
+    fmt_currency(columns = income_2025, currency = "USD", decimals = 0) |>
+    data_color(columns = income_2025,
+               palette = c("#f7fbff", "#6baed6", "#08306b")) |>
+    tab_style(style = cell_text(weight = "bold"),
+              locations = cells_column_labels()) |>
+    tab_caption("Per capita personal income by U.S. state, sorted from highest to lowest.")
 })
 ```
+
+## Income per Capita by State
+
+::: {.card}
+```{r}
+#| label: fig-income-state
+#| output: asis
+#| fig-alt: "Map of the lower 48 U.S. states displaying income per capita by state using a color scale"
+
+states_sf <- states(cb = TRUE, class = "sf",
+                    progress_bar = FALSE)
+
+map_data <- states_sf |>
+  left_join(us_data, by = c("NAME" = "GeoName"))
+
+colors <- scales::col_numeric(
+  palette = c("#f7fbff", "#6baed6", "#08306b"),
+  domain = map_data$income_2025)
+
+leaflet(map_data, height = 500) |>
+  addTiles(providers$CartoDB.PositronNoLabels) |>
+  addPolygons(fillColor = ~colors(income_2025),
+              fillOpacity = 1,
+              color = "white",
+              weight = 1,
+              label = ~paste0(NAME, ": $", scales::comma(income_2025)),
+    highlightOptions = highlightOptions(weight = 2,
+      color = "black",
+      bringToFront = TRUE)) |>
+  addLegend(position = "bottomright",
+            pal = colors,
+            values = ~na.omit(income_2025),
+            title = "Income per capita",
+            labFormat = labelFormat(prefix = "$",
+                                    big.mark = ","),
+            opacity = 1) |>
+   setView(-96, 42, 4) 
+```
+
+
+
+```{r}
+selectInput(
+  inputId  = "region_select",
+  label    = "Filter by Region:",
+  choices  = c("All" = "All",
+               "New England"    = "1",
+               "Mideast"        = "2",
+               "Great Lakes"    = "3",
+               "Plains"         = "4",
+               "Southeast"      = "5",
+               "Southwest"      = "6",
+               "Rocky Mountain" = "7",
+               "Far West"       = "8"),
+  selected = "All"
+)
+```
+
+:::
